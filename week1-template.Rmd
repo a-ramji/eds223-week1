@@ -13,7 +13,7 @@ Let's install all the necessary packages to reproduce code from Geocomp with R.
 ```{r}
 #install.packages("spDataLarge", repos = "https://geocompr.r-universe.dev")
 #install.packages("remotes")
-remotes::install_github("geocompx/geocompkg")
+# # remotes::install_github("geocompx/geocompkg")
 ```
 
 Let's load all necessary packages.
@@ -53,17 +53,26 @@ the first element is always "tm_shape"
 
 ```{r include=TRUE}
 
+tm_shape(nz) + 
+  tm_fill()
+
 ```
 
 now let's plot just the boundaries
 
 ```{r include=TRUE}
 
+tm_shape(nz) +
+  tm_borders()
+
 ```
 
 and the shapes and boundaries together
 
 ```{r include=TRUE}
+tm_shape(nz) +
+  tm_fill() +
+  tm_borders()
 
 ```
 
@@ -73,7 +82,10 @@ and the shapes and boundaries together
 -   this means that we store a base map and add additional layers later
 
 ```{r include = TRUE}
-
+map_nz <- tm_shape(nz) +
+  tm_polygons()
+#class(map_nz)
+#map_nz
 ```
 
 -   we can add new shapes on top of the base map
@@ -82,13 +94,18 @@ and the shapes and boundaries together
 In this case, we're adding a layer with information on elevation and this layer to have 70% transparency.
 
 ```{r include = TRUE}
-
+map_nz1 <- map_nz +
+  tm_shape(nz_elev) +
+  tm_raster(alpha = 0.7, title = "Elevation")
+# in version 4, we'd say col_alpha = 
 ```
 
 we can add points designating high points in the country
 
 ```{r include = TRUE}
-
+map_nz1 +
+  tm_shape(nz_height) +
+  tm_dots()
 ```
 
 ## aesthetic basics
@@ -100,31 +117,41 @@ we can add points designating high points in the country
 Let's start by changing some fixed aesthetics...First, let's change the color used to fill the NZ shapes.
 
 ```{r include=TRUE}
-
+tm_shape(nz) +
+  tm_polygons(col = "red")
 ```
 
 now change the color of the boundaries
 
 ```{r include=TRUE}
-
+tm_shape(nz) +
+  tm_polygons(border.col = "blue")
 ```
 
 and the width of the boundary lines
 
 ```{r include=TRUE}
-
+tm_shape(nz) +
+  tm_polygons(col = "purple", 
+              border.col = "green", 
+              lwd = 3)
 ```
 
 and the line type of the boundary lines
 
 ```{r include=TRUE}
-
+tm_shape(nz) +
+  tm_polygons(lty = 3)
 ```
 
 all together now!
 
 ```{r include=TRUE}
-
+tm_shape(nz) +
+  tm_polygons(col = "purple", 
+              border.col = "green", 
+              lwd = 2, 
+              lty = 3)
 ```
 
 Now let's change the colors based on a value. We noticed that the New Zealand dataset has a column with each state's land area
@@ -136,18 +163,29 @@ nz
 Let's try to plot the Land_area column. We might think that the following works, but it doesn't!
 
 ```{r include=TRUE}
-
+tm_shape(nz) +
+  tm_fill(col = nz$Land_area) 
 ```
 
 Instead, **tmap** is expecting a character string naming the attribute associated with the geometry
 
 ```{r include = TRUE}
-
+tm_shape(nz) +
+  tm_fill(col = "Land_area", 
+        #  title = "Land Area"
+        #  , palette = "viridis"
+          )
 ```
 
 We can also add an argument that updates the title of the legend
 
 ```{r include=TRUE}
+
+tm_shape(nz) +
+  tm_fill(col = "Land_area", 
+          title = "Land area"
+        #  , palette = "viridis"
+          )
 
 ```
 
@@ -169,15 +207,22 @@ We can even make it more precise using the "expression" function
 Notice how the following maps display the same data, but look quite different
 
 ```{r include=TRUE}
-
+tm_shape(nz) +
+  tm_polygons(col = "Median_income", 
+              style = "pretty")
 ```
 
 ```{r include=TRUE}
-
+tm_shape(nz) +
+  tm_polygons(col = "Median_income", 
+              style = "quantile")
 ```
 
 ```{r include=TRUE}
-
+tm_shape(nz) +
+  tm_polygons(col = "Median_income", 
+              style = "jenks",
+              title = "Median income")
 ```
 
 ```{r include=TRUE}
@@ -187,7 +232,11 @@ Notice how the following maps display the same data, but look quite different
 We can also define custom bins
 
 ```{r include=TRUE}
+breaks = c(0, 3, 4, 5) * 10000
 
+tm_shape(nz) +
+  tm_polygons(col = "Median_income", 
+              breaks = breaks)
 ```
 
 -   in some cases we might not want to use bins
@@ -195,11 +244,16 @@ We can also define custom bins
     -   **style = "cont"** displays colors as a continuous spectrum
     -   **style = "cat"** uses a unique vale for each categorical value
 
-    ```{r include=TRUE}
+```{r include=TRUE}
+map_nz
 
-    ```
+```
 
 ```{r include=TRUE}
+map_nz + 
+  tm_shape(nz_elev) +
+  tm_raster(alpha = 0.7, style = "cont")# +
+ #=tm_scale_bar()
 
 ```
 
@@ -211,19 +265,34 @@ We can also define custom bins
 To clearly give readers the context of our map, we can include a compass and scale bar
 
 ```{r include=TRUE}
-
+map_nz + 
+  tm_compass(type = "4star", 
+             position = c("left", "top"),
+             #text.size = 2,
+             size = 3
+             ) +
+  tm_scale_bar()
 ```
 
 Instead of using a compass and scale bar, we could add latitude/longitudes graticules
 
 ```{r include=TRUE}
+# map_nz + 
+#   tm_compass(type = "4star", 
+#              position = c("left", "top")) +
+#   tm_scale_bar()
+
+map_nz +
+  tm_graticules()
 
 ```
 
 We can also update the background color
 
 ```{r include=TRUE}
-
+map_nz +
+  tm_graticules() +
+  tm_layout(bg.color = "blue")
 ```
 
 ## faceted and animated maps
@@ -241,11 +310,15 @@ We can also update the background color
 -   all we need to do is enter the interactive mode
 
 ```{r include=TRUE}
+tmap_mode("view") 
 
+map_nz
 ```
 
 To go back to regular plotting, we just need enter plotting mode
 
 ```{r include=TRUE}
+tmap_mode("plot")
+map_nz
 
 ```
