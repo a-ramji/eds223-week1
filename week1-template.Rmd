@@ -11,8 +11,8 @@ knitr::opts_chunk$set(echo = TRUE)
 Let's install all the necessary packages to reproduce code from Geocomp with R.
 
 ```{r}
-install.packages("spDataLarge", repos = "https://geocompr.r-universe.dev")
-install.packages("remotes")
+#install.packages("spDataLarge", repos = "https://geocompr.r-universe.dev")
+#install.packages("remotes")
 remotes::install_github("geocompx/geocompkg")
 ```
 
@@ -24,7 +24,7 @@ library(terra)
 library(dplyr)
 library(spData)
 library(spDataLarge)
-remotes::install_github("r-tmap/tmap@v4")
+#remotes::install_github("r-tmap/tmap@v4")
 library(tmap)    # for static and interactive maps
 library(leaflet) # for interactive maps
 library(ggplot2) # tidyverse data visualization package
